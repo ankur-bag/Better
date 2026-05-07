@@ -11,7 +11,13 @@ def create_app(config_name='development'):
     app.config.from_object(config[config_name])
     
     # Enable CORS for frontend
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    origins = [
+        app.config.get("FRONTEND_URL"),
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://better-avento.vercel.app"
+    ]
+    CORS(app, resources={r"/api/*": {"origins": [o for o in origins if o]}})
     
     # Register blueprints
     from app.routes import events, registrations, templates

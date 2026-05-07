@@ -25,6 +25,9 @@ class Config:
     SUPABASE_URL = os.getenv("VITE_SUPABASE_URL", "")
     SUPABASE_PASSWORD = os.getenv("SUPABASE_PASSWORD", "")
     SUPABASE_PUBLISHABLE_KEY = os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY", "")
+    
+    # Frontend URL for CORS
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 
 class DevelopmentConfig(Config):
