@@ -66,6 +66,7 @@ def get_event_public(event_id):
             public_status = "Full"
             
         event['active_count'] = active_count
+        event['confirmed_count'] = active_count  # Frontend expects confirmed_count
         event['remaining_spots'] = remaining_spots
         event['public_status'] = public_status
         

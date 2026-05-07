@@ -12,6 +12,7 @@ createRoot(document.getElementById('root')!).render(
       publishableKey={publishableKey}
       signInFallbackRedirectUrl="/dashboard"
       signUpFallbackRedirectUrl="/dashboard"
+      afterSignOutUrl="/"
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
     >

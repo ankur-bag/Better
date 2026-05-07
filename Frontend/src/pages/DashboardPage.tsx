@@ -1,4 +1,4 @@
-import { useUser } from '@clerk/react';
+import { useUser, UserButton } from '@clerk/react';
 import { Plus, Calendar, ArrowRight, Copy, Trash2, MapPin, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -84,18 +84,34 @@ export default function DashboardPage() {
   const activeEvents = events.filter(e => e.status !== 'cancelled');
   const cancelledEvents = events.filter(e => e.status === 'cancelled');
 
+  if (loading) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="w-12 h-12 border-2 border-gray-100 border-t-[#FF1313] rounded-full animate-spin" />
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-8 py-12">
+        <div className="max-w-6xl mx-auto px-8 py-12 flex justify-between items-start">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
           >
+            <button 
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 text-gray-500 hover:text-[#FF1313] transition-colors text-sm mb-6 group"
+            >
+              <ArrowRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
+              Back to Home
+            </button>
             <h1 className="text-4xl font-light text-gray-900 mb-2">Welcome back, {user?.firstName || 'there'}</h1>
             <p className="text-gray-500 font-light">Manage your events and track registrations</p>
           </motion.div>
+          <div className="pt-2">
+            <UserButton />
+          </div>
         </div>
       </div>
 

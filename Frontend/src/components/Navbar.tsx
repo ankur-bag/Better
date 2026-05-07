@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { Link } from 'react-router-dom';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useUser, useClerk } from '@clerk/react';
+import { useUser, useClerk, UserButton } from '@clerk/react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -135,13 +135,17 @@ export default function Navbar() {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-6">
-            <button
-              onClick={handleGetStarted}
-              className="bg-[#FF1313] text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-[#E61111] hover:shadow-[0_0_20px_rgba(255,19,19,0.4)] transition-all hover:-translate-y-0.5 flex items-center gap-2 cursor-pointer"
-            >
-              Get started
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            {isSignedIn ? (
+              <UserButton />
+            ) : (
+              <button
+                onClick={handleGetStarted}
+                className="bg-[#FF1313] text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-[#E61111] hover:shadow-[0_0_20px_rgba(255,19,19,0.4)] transition-all hover:-translate-y-0.5 flex items-center gap-2 cursor-pointer"
+              >
+                Get started
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Toggle */}
