@@ -1,5 +1,5 @@
 import { useUser } from '@clerk/react';
-import { Plus, Calendar, Users, ArrowRight, Copy, Trash2, MapPin, Clock } from 'lucide-react';
+import { Plus, Calendar, ArrowRight, Copy, Trash2, MapPin, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useEffect, useState, useCallback } from 'react';
@@ -214,11 +214,6 @@ function EventCard({ event, onCopy, onDelete, onCancel, onClick, isCancelled }: 
       <div className="flex-1 cursor-pointer" onClick={onClick}>
         <div className="flex items-center justify-between mb-4">
           <Badge status={event.status} />
-          {event.status !== 'cancelled' && (
-            <span className="bg-green-50 text-green-600 px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-tight">
-              {event.confirmed_count || 0} approved
-            </span>
-          )}
         </div>
         
         <h3 className="text-xl font-medium text-gray-900 mb-4 group-hover:text-[#FF1313] transition-colors line-clamp-2">

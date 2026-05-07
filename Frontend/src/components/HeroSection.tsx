@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useUser, useClerk } from '@clerk/react';
 
 export default function HeroSection() {
@@ -23,7 +23,6 @@ export default function HeroSection() {
       // Open sign-in modal - user will be redirected to /dashboard after signing in
       clerk.openSignIn({ 
         fallbackRedirectUrl: '/dashboard',
-        redirectUrl: '/dashboard'
       });
     } else {
       // Already signed in - navigate to dashboard

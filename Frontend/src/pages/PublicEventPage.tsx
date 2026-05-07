@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, MapPin, Users, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, MapPin, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { eventApi, registrationApi } from '../api';
 import type { Event } from '../types';
 
@@ -159,12 +159,6 @@ export default function PublicEventPage() {
                     ? "Confirmation has been sent to your email. See you there!"
                     : "Your application is being reviewed. We'll notify you soon."}
                 </p>
-                <button 
-                  onClick={() => setSuccess(false)}
-                  className="text-sm font-medium text-[#FF1313] hover:underline"
-                >
-                  Register another person
-                </button>
               </motion.div>
             ) : (
               <>
@@ -191,7 +185,7 @@ export default function PublicEventPage() {
                   <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100 flex gap-3">
                     <AlertCircle className="w-5 h-5 text-gray-400 shrink-0" />
                     <p className="text-sm text-gray-500 font-normal leading-snug">
-                      Registration is currently {event.public_status.toLowerCase()}.
+                      Registration is currently {event.public_status?.toLowerCase()}.
                     </p>
                   </div>
                 )}

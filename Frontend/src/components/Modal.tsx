@@ -10,7 +10,7 @@ interface ModalProps {
   confirmLabel?: string;
   onConfirm?: () => void;
   confirmLoading?: boolean;
-  type?: 'danger' | 'primary';
+  type?: 'danger' | 'primary' | 'success';
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -77,7 +77,9 @@ export const Modal: React.FC<ModalProps> = ({
                   className={`flex-1 px-4 py-2.5 rounded-xl text-white font-medium text-sm transition-all shadow-sm ${
                     type === 'danger' 
                       ? 'bg-[#FF1313] hover:bg-[#E61111] shadow-red-100' 
-                      : 'bg-black hover:bg-gray-800'
+                      : type === 'success'
+                        ? 'bg-green-600 hover:bg-green-700 shadow-green-100'
+                        : 'bg-black hover:bg-gray-800'
                   } disabled:opacity-50`}
                 >
                   {confirmLoading ? 'Processing...' : confirmLabel}

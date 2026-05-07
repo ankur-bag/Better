@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Users, Edit, Settings, ExternalLink, Calendar, MapPin, Trash2, ShieldOff, Rocket } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { eventApi } from '../api';
 import { useAuth } from '@clerk/react';
 import { Badge } from '../components/Badge';
@@ -171,7 +170,7 @@ export default function EventDetailPage() {
                     className="group p-6 bg-[#FEF5F8] border border-[#FF1313]/20 rounded-2xl text-left hover:shadow-lg hover:shadow-red-50 transition-all"
                   >
                     <Rocket className="w-8 h-8 text-[#FF1313] mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-1 group-hover:text-[#FF1313] transition-colors text-[#FF1313]">Launch Event</h3>
+                    <h3 className="text-lg font-medium mb-1 group-hover:text-[#FF1313] transition-colors text-[#FF1313]">Launch Event</h3>
                     <p className="text-sm text-gray-500 font-normal">Make this event public and start accepting guests</p>
                   </button>
                 )}

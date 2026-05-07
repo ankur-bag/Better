@@ -18,7 +18,7 @@ export function useEvents() {
     try {
       setLoading(true);
       setError(null);
-      const token = user?.id ? await getToken() : undefined;
+      const token = user?.id ? (await getToken() || undefined) : undefined;
       return await eventApi.listPublished(token);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load events');
@@ -32,7 +32,7 @@ export function useEvents() {
     try {
       setLoading(true);
       setError(null);
-      const token = user?.id ? await getToken() : undefined;
+      const token = user?.id ? (await getToken() || undefined) : undefined;
       return await eventApi.getById(eventId, token);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load event');
