@@ -19,6 +19,11 @@ def create_app(config_name='development'):
     app.register_blueprint(registrations.bp)
     app.register_blueprint(templates.templates_bp)
     
+    # Root route
+    @app.route('/', methods=['GET'])
+    def index():
+        return {"message": "Avento API is running", "docs": "/api/health"}, 200
+
     # Health check route
     @app.route('/api/health', methods=['GET'])
     def health():
