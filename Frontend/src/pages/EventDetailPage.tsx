@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Users, Edit, Settings, ExternalLink, Calendar, MapPin, Trash2, ShieldOff } from 'lucide-react';
+import { ArrowLeft, Users, Edit, Settings, ExternalLink, Calendar, MapPin, Trash2, ShieldOff, Rocket } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { eventApi } from '../api';
 import { useAuth } from '@clerk/react';
@@ -20,6 +20,7 @@ export default function EventDetailPage() {
   
   const [cancelModal, setCancelModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
+  const [launchModal, setLaunchModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
@@ -38,6 +39,22 @@ export default function EventDetailPage() {
     }
     fetchEvent();
   }, [id, getToken]);
+
+  const handleLaunch = async () => {
+    if (!id) return;
+    setActionLoading(true);
+    try {
+      const token = await getToken();
+      if (!token) throw new Error('Not authenticated');
+      await eventApi.publish(id, token);
+      setToast('Event launched successfully!');
+      setTimeout(() => navigate('/dashboard'), 1500);
+    } catch (err) {
+      setToast(err instanceof Error ? err.message : 'Launch failed');
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const handleCancel = async () => {
     if (!id) return;
@@ -140,13 +157,24 @@ export default function EventDetailPage() {
 
                 <button
                   onClick={() => setCancelModal(true)}
-                  disabled={event.status === 'cancelled'}
+                  disabled={event.status === 'cancelled' || event.status === 'draft'}
                   className="group p-6 bg-gray-50 border border-gray-100 rounded-2xl text-left hover:bg-red-50 hover:border-red-100 transition-all disabled:opacity-50 disabled:grayscale"
                 >
                   <ShieldOff className="w-8 h-8 text-gray-400 group-hover:text-[#FF1313] mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-1 group-hover:text-[#FF1313] transition-colors">Cancel Event</h3>
                   <p className="text-sm text-gray-500 font-normal">Halt registrations and notify all guests</p>
                 </button>
+
+                {event.status === 'draft' && (
+                  <button
+                    onClick={() => setLaunchModal(true)}
+                    className="group p-6 bg-[#FEF5F8] border border-[#FF1313]/20 rounded-2xl text-left hover:shadow-lg hover:shadow-red-50 transition-all"
+                  >
+                    <Rocket className="w-8 h-8 text-[#FF1313] mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-1 group-hover:text-[#FF1313] transition-colors text-[#FF1313]">Launch Event</h3>
+                    <p className="text-sm text-gray-500 font-normal">Make this event public and start accepting guests</p>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -178,8 +206,8 @@ export default function EventDetailPage() {
                 <div className="flex gap-3">
                   <Settings className="w-5 h-5 text-gray-400 shrink-0" />
                   <div>
-                    <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-1">Slug</p>
-                    <p className="text-sm text-gray-700">/{event.slug}</p>
+                    <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-1">Status</p>
+                    <p className="text-sm text-gray-700 capitalize">{event.status}</p>
                   </div>
                 </div>
               </div>
@@ -234,6 +262,18 @@ export default function EventDetailPage() {
         type="danger"
       >
         You are about to delete this event and all its registrations. This cannot be undone.
+      </Modal>
+
+      <Modal
+        isOpen={launchModal}
+        onClose={() => setLaunchModal(false)}
+        title="Launch Event?"
+        confirmLabel="Launch Now"
+        onConfirm={handleLaunch}
+        confirmLoading={actionLoading}
+        type="success"
+      >
+        You are about to make this event public. It will be visible to everyone and ready for registrations.
       </Modal>
 
       <Toast message={toast} onClose={() => setToast(null)} />

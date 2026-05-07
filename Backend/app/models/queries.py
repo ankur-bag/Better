@@ -54,7 +54,7 @@ def create_event(
         cursor.execute("""
             INSERT INTO events 
             (id, organizer_id, title, description, location, start_datetime, end_datetime, capacity, registration_mode, status, slug, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'published', %s, NOW())
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'draft', %s, NOW())
             RETURNING id, organizer_id, title, description, location, start_datetime, end_datetime, capacity, registration_mode, status, slug, created_at
         """, (event_id, organizer_id, title, description, location, start_datetime, end_datetime, capacity, registration_mode, slug))
         return dict(cursor.fetchone())
@@ -142,11 +142,11 @@ def delete_event(db, event_id: str) -> Dict[str, Any]:
 
 
 def count_confirmed_registrations(db, event_id: str) -> int:
-    """Count confirmed registrations for an event (legacy - uses 'confirmed' status)."""
+    """Count confirmed registrations for an event (registered + approved only)."""
     with db.get_cursor(commit=False) as cursor:
         cursor.execute("""
             SELECT COUNT(*) as count FROM registrations 
-            WHERE event_id = %s AND status = 'confirmed'
+            WHERE event_id = %s AND status IN ('registered', 'approved')
         """, (event_id,))
         row = cursor.fetchone()
         return row['count'] if row else 0

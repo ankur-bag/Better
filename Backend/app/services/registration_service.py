@@ -128,13 +128,15 @@ def register_attendee_public_by_id_service(
     # Trigger email
     try:
         from app.extensions.email import send_registration_confirmed, send_application_received
+        print(f"DEBUG: Registration created with status '{status}'. Triggering email notification...")
         if status == 'registered':
             send_registration_confirmed(attendee_email, attendee_name, event)
         else:
             send_application_received(attendee_email, attendee_name, event)
+        print(f"DEBUG: Email notification triggered for {attendee_email}")
     except Exception as e:
-        import logging
-        logging.error(f"Failed to send email: {e}")
+        print(f"DEBUG: Failed to trigger email notification: {str(e)}")
+        logger.error(f"[registration_service] Email error: {e}")
         
     return registration
 

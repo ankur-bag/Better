@@ -85,6 +85,13 @@ export const eventApi = {
       token,
     }),
 
+  // Publish event (organizer only)
+  publish: (eventId: string, token: string): Promise<Event> =>
+    apiCall(`/events/${eventId}/publish`, {
+      method: 'POST',
+      token,
+    }),
+
   // Delete draft event
   delete: (eventId: string, token: string): Promise<void> =>
     apiCall(`/events/${eventId}`, {

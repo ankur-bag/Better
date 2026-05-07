@@ -181,8 +181,8 @@ def render_registration_confirmed(event: dict, attendee_name: str = "Attendee") 
             </div>
         </div>
         
-        <p style="text-align: center;">
-            <a href="https://avento.com" class="button">View Event Dashboard</a>
+        <p style="text-align: center; color: #6B7280; font-size: 14px;">
+            Your registration is confirmed. We look forward to seeing you!
         </p>
     """
     return render_base_layout(content)
@@ -212,8 +212,8 @@ def render_registration_approved(event: dict, attendee_name: str = "Attendee") -
             </div>
         </div>
         
-        <p style="text-align: center;">
-            <a href="https://avento.com" class="button">Access Event</a>
+        <p style="text-align: center; color: #6B7280; font-size: 14px;">
+            Your registration has been approved. See you at the event!
         </p>
     """
     return render_base_layout(content)
@@ -222,7 +222,7 @@ def render_registration_approved(event: dict, attendee_name: str = "Attendee") -
 def render_registration_rejected(event: dict, attendee_name: str = "Attendee") -> str:
     """Render registration rejected email template."""
     content = f"""
-        <div class="badge badge-danger">Update</div>
+        <div class="badge badge-danger">Rejected</div>
         <h2>Registration Update</h2>
         <p>Hi {attendee_name},</p>
         <p>Thank you for your interest in <strong>{event['title']}</strong>.</p>
@@ -295,8 +295,8 @@ def render_organizer_registration_pending(event: dict, attendee_name: str, atten
             </div>
         </div>
         
-        <p style="text-align: center;">
-            <a href="https://avento.com/organizer-dashboard" class="button">Review Application</a>
+        <p style="text-align: center; color: #6B7280; font-size: 14px;">
+            Please visit your dashboard to manage this application.
         </p>
     """
     return render_base_layout(content)

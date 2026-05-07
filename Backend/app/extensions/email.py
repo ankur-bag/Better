@@ -46,7 +46,7 @@ def _send_email(to: str, subject: str, html: str) -> bool:
 
 def send_registration_confirmed(attendee_email: str, attendee_name: str, event: Dict[str, Any]) -> None:
     """Send registration confirmed email to attendee (Open registration)."""
-    subject = f"✓ Registration Confirmed: {event['title']}"
+    subject = f"Registration Confirmed: {event['title']}"
     html = render_registration_confirmed(event, attendee_name)
     _send_email(attendee_email, subject, html)
 
@@ -60,7 +60,7 @@ def send_application_received(attendee_email: str, attendee_name: str, event: Di
 
 def send_registration_approved(attendee_email: str, attendee_name: str, event: Dict[str, Any]) -> None:
     """Send registration approved email to attendee."""
-    subject = f"✓ Registration Approved: {event['title']}"
+    subject = f"Registration Approved: {event['title']}"
     html = render_registration_approved(event, attendee_name)
     _send_email(attendee_email, subject, html)
 
@@ -81,7 +81,7 @@ def send_registration_revoked(attendee_email: str, attendee_name: str, event: Di
 
 def send_event_cancelled(attendee_email: str, attendee_name: str, event: Dict[str, Any]) -> None:
     """Send event cancelled email to registered attendee."""
-    subject = f"⚠ Event Cancelled: {event['title']}"
+    subject = f"Event Cancelled: {event['title']}"
     html = render_event_cancelled(event, attendee_name)
     _send_email(attendee_email, subject, html)
 
