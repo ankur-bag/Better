@@ -131,7 +131,7 @@ def require_auth(f):
             import traceback
             print(f"Auth Exception: {str(e)}")
             traceback.print_exc()
-            return jsonify({"error": "Authentication failed"}), 401
+            return jsonify({"error": f"Authentication failed: {str(e)}"}), 401
     
     return decorated_function
 
