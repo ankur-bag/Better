@@ -8,12 +8,16 @@ import AttendeesPage from './pages/AttendeesPage.tsx';
 import PublicEventPage from './pages/PublicEventPage.tsx';
 import EventTemplatePage from './pages/EventTemplatePage.tsx';
 import EventDetailPage from './pages/EventDetailPage.tsx';
+import SignInPage from './pages/SignInPage.tsx';
+import SignUpPage from './pages/SignUpPage.tsx';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/sign-in/*" element={<SignInPage />} />
+        <Route path="/sign-up/*" element={<SignUpPage />} />
         <Route path="/events/:id" element={<PublicEventPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
