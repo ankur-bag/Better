@@ -54,7 +54,7 @@ def create_event(
         cursor.execute("""
             INSERT INTO events 
             (id, organizer_id, title, description, location, start_datetime, end_datetime, capacity, registration_mode, status, slug, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'draft', %s, NOW())
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'published', %s, NOW())
             RETURNING id, organizer_id, title, description, location, start_datetime, end_datetime, capacity, registration_mode, status, slug, created_at
         """, (event_id, organizer_id, title, description, location, start_datetime, end_datetime, capacity, registration_mode, slug))
         return dict(cursor.fetchone())
