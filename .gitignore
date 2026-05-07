@@ -52,3 +52,6 @@ npm-debug.log*
 # Other build artifacts
 dist/
 build/
+
+# Private Docs
+PRD.md
