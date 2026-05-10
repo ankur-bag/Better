@@ -94,7 +94,7 @@ export default function Navbar() {
               style={{ color: isScrolled ? '#FF1313' : '#FF1313' }}
               className="text-2xl font-bold tracking-tighter font-light"
             >
-              avento
+              avento.
             </motion.span>
           </Link>
 
