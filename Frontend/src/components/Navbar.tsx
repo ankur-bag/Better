@@ -92,9 +92,9 @@ export default function Navbar() {
           <Link to="/" className="flex items-center">
             <motion.span 
               style={{ color: isScrolled ? '#FF1313' : '#FF1313' }}
-              className="text-2xl font-bold tracking-tighter"
+              className="text-2xl font-bold tracking-tighter font-light"
             >
-              AVENTO
+              avento
             </motion.span>
           </Link>
 
