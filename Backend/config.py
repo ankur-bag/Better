@@ -26,6 +26,9 @@ class Config:
     SUPABASE_PASSWORD = os.getenv("SUPABASE_PASSWORD", "")
     SUPABASE_PUBLISHABLE_KEY = os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY", "")
     
+    # AI
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+    
     # Frontend URL for CORS
     FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 

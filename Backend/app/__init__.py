@@ -20,10 +20,11 @@ def create_app(config_name='development'):
     CORS(app, resources={r"/api/*": {"origins": [o for o in origins if o]}})
     
     # Register blueprints
-    from app.routes import events, registrations, templates
+    from app.routes import events, registrations, templates, ai
     app.register_blueprint(events.bp)
     app.register_blueprint(registrations.bp)
     app.register_blueprint(templates.templates_bp)
+    app.register_blueprint(ai.ai_bp)
     
     # Root route
     @app.route('/', methods=['GET'])

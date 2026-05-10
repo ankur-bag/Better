@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Calendar, MapPin, Users, Loader2 } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Users, Loader2, Sparkles, Clock, CalendarDays } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth as useClerkAuth } from '@clerk/react';
-import { eventApi } from '../api';
+import { eventApi, aiApi } from '../api';
 import type { CreateEventInput } from '../types';
 
 export default function CreateEventPage() {
@@ -11,6 +11,9 @@ export default function CreateEventPage() {
   const [searchParams] = useSearchParams();
   const { getToken } = useClerkAuth();
   const [submitting, setSubmitting] = useState(false);
+  const [enhancing, setEnhancing] = useState(false);
+  const [showAiOptions, setShowAiOptions] = useState(false);
+  const [originalDescription, setOriginalDescription] = useState('');
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     title: '',
@@ -45,6 +48,100 @@ export default function CreateEventPage() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleEnhanceDescription = async () => {
+    if (!formData.description.trim()) {
+      setError('Please write a basic description first to enhance it.');
+      return;
+    }
+    
+    setOriginalDescription(formData.description);
+    setEnhancing(true);
+    setShowAiOptions(false);
+    setError('');
+    
+    try {
+      const token = await getToken();
+      if (!token) throw new Error('Not authenticated.');
+      
+      const res = await aiApi.enhanceDescription(formData.description, formData.title, token);
+      setFormData(prev => ({
+        ...prev,
+        description: res.enhanced_description
+      }));
+      setShowAiOptions(true);
+    } catch (err: any) {
+      console.error('Failed to enhance description:', err);
+      setError(err?.message || 'Failed to enhance description. AI might be unavailable.');
+    } finally {
+      setEnhancing(false);
+    }
+  };
+
+  const handleAcceptAi = () => {
+    setShowAiOptions(false);
+  };
+
+  const handleDiscardAi = () => {
+    setFormData(prev => ({
+      ...prev,
+      description: originalDescription
+    }));
+    setShowAiOptions(false);
+  };
+
+  const setQuickDate = (type: 'today' | 'tomorrow' | 'weekend') => {
+    const now = new Date();
+    let start = new Date(now);
+    let end = new Date(now);
+    
+    if (type === 'today') {
+      start.setHours(18, 0, 0, 0);
+      end.setHours(20, 0, 0, 0);
+    } else if (type === 'tomorrow') {
+      start.setDate(start.getDate() + 1);
+      start.setHours(18, 0, 0, 0);
+      end.setDate(end.getDate() + 1);
+      end.setHours(20, 0, 0, 0);
+    } else if (type === 'weekend') {
+      // Find next Saturday
+      const daysUntilSaturday = (6 - start.getDay() + 7) % 7 || 7;
+      start.setDate(start.getDate() + daysUntilSaturday);
+      start.setHours(10, 0, 0, 0);
+      end.setDate(end.getDate() + daysUntilSaturday);
+      end.setHours(14, 0, 0, 0);
+    }
+
+    // Format to YYYY-MM-DDTHH:mm
+    const formatDateTime = (d: Date) => {
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      start_datetime: formatDateTime(start),
+      end_datetime: formatDateTime(end)
+    }));
+  };
+
+  const handleDateTimeChange = (field: 'start' | 'end', type: 'date' | 'time', value: string) => {
+    setFormData(prev => {
+      const current = prev[`${field}_datetime` as keyof typeof prev] as string;
+      const [cDate, cTime] = current ? current.split('T') : ['', ''];
+      
+      let newDate = type === 'date' ? value : cDate;
+      let newTime = type === 'time' ? value : cTime;
+      
+      if (newDate && !newTime) newTime = '12:00';
+      if (!newDate && newTime) newDate = new Date().toISOString().split('T')[0];
+      
+      return {
+        ...prev,
+        [`${field}_datetime`]: (newDate || newTime) ? `${newDate || ''}T${newTime || ''}` : ''
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,16 +228,59 @@ export default function CreateEventPage() {
 
           {/* Description */}
           <div>
-            <label className="block text-gray-900 font-light mb-3">Description</label>
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-gray-900 font-light">Description</label>
+              <button
+                type="button"
+                onClick={handleEnhanceDescription}
+                disabled={enhancing || !formData.description.trim()}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {enhancing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
+                {enhancing ? 'Enhancing...' : 'Magic Enhance'}
+              </button>
+            </div>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Tell attendees about your event"
+              placeholder="Tell attendees about your event. Write a draft and click Magic Enhance to let AI perfect it!"
               rows={4}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#FF1313] focus:ring-1 focus:ring-[#FF1313]/20 transition-all resize-none"
+              className={`w-full bg-gray-50 border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 transition-all resize-none ${
+                enhancing ? 'border-purple-300 ring-purple-300 bg-purple-50/30' : 
+                showAiOptions ? 'border-purple-400 ring-purple-400 bg-purple-50/10' :
+                'border-gray-200 focus:border-[#FF1313] focus:ring-[#FF1313]/20'
+              }`}
               required
+              disabled={enhancing}
             />
+            {showAiOptions && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-3 mt-3"
+              >
+                <button
+                  type="button"
+                  onClick={handleAcceptAi}
+                  className="px-4 py-1.5 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                >
+                  Accept
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDiscardAi}
+                  className="px-4 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Discard
+                </button>
+                <span className="text-xs text-gray-500">Enhanced by AI</span>
+              </motion.div>
+            )}
           </div>
 
           {/* Location */}
@@ -161,32 +301,89 @@ export default function CreateEventPage() {
           </div>
 
           {/* Date and Time Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="flex items-center gap-2 text-gray-900 font-light mb-3">
-                <Calendar className="w-4 h-4 text-gray-400" />
-                Start Date &amp; Time
+          <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-6 mb-2 mt-2 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
+              <label className="flex items-center gap-2 text-gray-900 font-medium text-lg">
+                <Calendar className="w-5 h-5 text-purple-500" />
+                Event Schedule
               </label>
-              <input
-                type="datetime-local"
-                name="start_datetime"
-                value={formData.start_datetime}
-                onChange={handleChange}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-[#FF1313] focus:ring-1 focus:ring-[#FF1313]/20 transition-all"
-                required
-              />
+              
+              {/* Quick Selects */}
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => setQuickDate('today')} className="px-3 py-1.5 text-xs font-medium bg-white border border-gray-200 text-gray-700 rounded-full hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700 transition-colors shadow-sm">
+                  Today
+                </button>
+                <button type="button" onClick={() => setQuickDate('tomorrow')} className="px-3 py-1.5 text-xs font-medium bg-white border border-gray-200 text-gray-700 rounded-full hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700 transition-colors shadow-sm">
+                  Tomorrow
+                </button>
+                <button type="button" onClick={() => setQuickDate('weekend')} className="px-3 py-1.5 text-xs font-medium bg-white border border-gray-200 text-gray-700 rounded-full hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700 transition-colors shadow-sm">
+                  This Weekend
+                </button>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-gray-900 font-light mb-3">End Date &amp; Time</label>
-              <input
-                type="datetime-local"
-                name="end_datetime"
-                value={formData.end_datetime}
-                onChange={handleChange}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-[#FF1313] focus:ring-1 focus:ring-[#FF1313]/20 transition-all"
-                required
-              />
+            <div className="space-y-6">
+              {/* Start Date & Time */}
+              <div className="p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+                <label className="block text-gray-500 text-xs uppercase tracking-wider font-semibold mb-3">Event Starts</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <CalendarDays className="h-4 w-4 text-purple-400" />
+                    </div>
+                    <input
+                      type="date"
+                      value={formData.start_datetime ? formData.start_datetime.split('T')[0] : ''}
+                      onChange={(e) => handleDateTimeChange('start', 'date', e.target.value)}
+                      className="w-full bg-gray-50/50 border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-gray-900 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400/20 transition-all"
+                      required
+                    />
+                  </div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Clock className="h-4 w-4 text-purple-400" />
+                    </div>
+                    <input
+                      type="time"
+                      value={formData.start_datetime ? formData.start_datetime.split('T')[1] : ''}
+                      onChange={(e) => handleDateTimeChange('start', 'time', e.target.value)}
+                      className="w-full bg-gray-50/50 border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-gray-900 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400/20 transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* End Date & Time */}
+              <div className="p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+                <label className="block text-gray-500 text-xs uppercase tracking-wider font-semibold mb-3">Event Ends</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <CalendarDays className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="date"
+                      value={formData.end_datetime ? formData.end_datetime.split('T')[0] : ''}
+                      onChange={(e) => handleDateTimeChange('end', 'date', e.target.value)}
+                      className="w-full bg-gray-50/50 border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-gray-900 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400/20 transition-all"
+                      required
+                    />
+                  </div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Clock className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="time"
+                      value={formData.end_datetime ? formData.end_datetime.split('T')[1] : ''}
+                      onChange={(e) => handleDateTimeChange('end', 'time', e.target.value)}
+                      className="w-full bg-gray-50/50 border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-gray-900 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400/20 transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

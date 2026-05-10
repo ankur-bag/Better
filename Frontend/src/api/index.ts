@@ -168,3 +168,15 @@ export const templatesApi = {
   get: (templateId: string): Promise<Template> =>
     apiCall(`/templates/${templateId}`),
 };
+
+/**
+ * AI Features API
+ */
+export const aiApi = {
+  enhanceDescription: (description: string, title: string, token: string): Promise<{ enhanced_description: string }> =>
+    apiCall('/ai/enhance-description', {
+      method: 'POST',
+      body: { description, title },
+      token,
+    }),
+};

@@ -1,6 +1,10 @@
 """Registration business logic and domain rules."""
 from datetime import datetime
 from typing import Dict, Any, List, Optional
+import logging
+
+logger = logging.getLogger(__name__)
+
 from app.models import queries
 
 
@@ -63,15 +67,13 @@ def register_attendee_service(
             from app.extensions.email import send_registration_confirmed
             send_registration_confirmed(attendee_email=attendee['email'], attendee_name=attendee.get('name', 'Attendee'), event=event)
         except Exception as e:
-            import logging
-            logging.error(f"[email] Failed to send registration confirmed: {e}")
+            logger.error(f"[email] Failed to send registration confirmed: {e}")
     elif status == 'pending' and attendee:
         try:
             from app.extensions.email import send_application_received
             send_application_received(attendee_email=attendee['email'], attendee_name=attendee.get('name', 'Attendee'), event=event)
         except Exception as e:
-            import logging
-            logging.error(f"[email] Failed to send application received: {e}")
+            logger.error(f"[email] Failed to send application received: {e}")
     
     return registration
 
@@ -240,7 +242,6 @@ def update_registration_status_service(
             send_registration_revoked(email, name, event)
     except Exception as e:
         print(f"DEBUG: Notification trigger failed: {e}")
-        import logging
-        logging.error(f"Notification failed: {e}")
+        logger.error(f"Notification failed: {e}")
         
     return updated

@@ -137,6 +137,10 @@ def render_base_layout(content: str, preview: str = "") -> str:
             background-color: #FDE8E8;
             color: #9B1C1C;
         }}
+        .badge-warning {{
+            background-color: #FEF3C7;
+            color: #92400E;
+        }}
     </style>
 </head>
 <body>
@@ -305,7 +309,7 @@ def render_organizer_registration_pending(event: dict, attendee_name: str, atten
 def render_registration_received(event: dict, attendee_name: str = "Attendee") -> str:
     """Render registration received email (for approval-based events)."""
     content = f"""
-        <div class="badge badge-success">Received</div>
+        <div class="badge badge-warning">Waitlist</div>
         <h2>Application Received</h2>
         <p>Hi {attendee_name},</p>
         <p>Your registration request for <strong>{event['title']}</strong> has been received and is currently being reviewed by the organizer.</p>

@@ -64,6 +64,9 @@ class ClerkJWTVerifier:
             raise ValueError(f"Invalid token: {str(e)}")
 
 
+_clerk_verifier = None
+_synced_users = set()
+
 def require_auth(f):
     """Decorator to require valid JWT token."""
     @wraps(f)
@@ -90,8 +93,10 @@ def require_auth(f):
         token = auth_header[7:]  # Remove 'Bearer ' prefix
         
         try:
-            verifier = ClerkJWTVerifier(Config.CLERK_PUBLISHABLE_KEY, Config.CLERK_JWKS_URL)
-            claims = verifier.verify_token(token)
+            global _clerk_verifier
+            if _clerk_verifier is None:
+                _clerk_verifier = ClerkJWTVerifier(Config.CLERK_PUBLISHABLE_KEY, Config.CLERK_JWKS_URL)
+            claims = _clerk_verifier.verify_token(token)
             
             # Store claims in request context
             # Fallback to 'organizer' if role is missing in public_metadata
@@ -110,18 +115,21 @@ def require_auth(f):
                 'role': user_role,
             }
             
-            # Sync user to local database to satisfy FK constraints
-            from app.models import get_db, queries
-            try:
-                db = get_db()
-                queries.create_user(
-                    db, 
-                    user_id=request.user['id'],
-                    email=request.user['email'],
-                    role=request.user['role']
-                )
-            except Exception as e:
-                print(f"Warning: Failed to sync user to DB: {e}")
+            # Sync user to local database to satisfy FK constraints, use in-memory cache to avoid repeated queries
+            user_id = request.user['id']
+            if user_id not in _synced_users:
+                from app.models import get_db, queries
+                try:
+                    db = get_db()
+                    queries.create_user(
+                        db, 
+                        user_id=user_id,
+                        email=request.user['email'],
+                        role=request.user['role']
+                    )
+                    _synced_users.add(user_id)
+                except Exception as e:
+                    print(f"Warning: Failed to sync user to DB: {e}")
             
             return f(*args, **kwargs)
         except ValueError as e:

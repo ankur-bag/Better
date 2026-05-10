@@ -271,29 +271,19 @@ def update_registration(db, registration_id: str, status: str) -> Dict[str, Any]
 
 
 def get_organizer_stats(db, organizer_id: str) -> Dict[str, Any]:
-    """Get statistics for an organizer's dashboard."""
+    """Get statistics for an organizer's dashboard in a single query."""
     with db.get_cursor(commit=False) as cursor:
-        # Total Events
-        cursor.execute("SELECT COUNT(*) as count FROM events WHERE organizer_id = %s", (organizer_id,))
-        total_events = cursor.fetchone()['count']
-        
-        # Total Attendees (registered or approved)
         cursor.execute("""
-            SELECT COUNT(*) as count FROM registrations r
-            JOIN events e ON r.event_id = e.id
-            WHERE e.organizer_id = %s AND r.status IN ('registered', 'approved')
-        """, (organizer_id,))
-        total_attendees = cursor.fetchone()['count']
+            SELECT 
+                (SELECT COUNT(*) FROM events WHERE organizer_id = %s) as total_events,
+                (SELECT COUNT(*) FROM registrations r JOIN events e ON r.event_id = e.id WHERE e.organizer_id = %s AND r.status IN ('registered', 'approved')) as total_attendees,
+                (SELECT COUNT(*) FROM events WHERE organizer_id = %s AND status = 'published' AND end_datetime > NOW()) as active_events
+        """, (organizer_id, organizer_id, organizer_id))
         
-        # Active Events (published and end_datetime > NOW())
-        cursor.execute("""
-            SELECT COUNT(*) as count FROM events 
-            WHERE organizer_id = %s AND status = 'published' AND end_datetime > NOW()
-        """, (organizer_id,))
-        active_events = cursor.fetchone()['count']
+        row = cursor.fetchone()
         
         return {
-            "total_events": total_events,
-            "total_attendees": total_attendees,
-            "active_events": active_events
+            "total_events": row['total_events'] if row else 0,
+            "total_attendees": row['total_attendees'] if row else 0,
+            "active_events": row['active_events'] if row else 0
         }
