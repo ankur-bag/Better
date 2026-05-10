@@ -102,7 +102,7 @@ def get_organizer_events(db, organizer_id: str) -> List[Dict[str, Any]]:
             SELECT id, organizer_id, title, description, location, start_datetime, end_datetime, capacity, registration_mode, status, slug, created_at
             FROM events 
             WHERE organizer_id = %s
-            ORDER BY start_datetime ASC
+            ORDER BY created_at DESC
         """, (organizer_id,))
         rows = cursor.fetchall()
         return [dict(row) for row in rows]

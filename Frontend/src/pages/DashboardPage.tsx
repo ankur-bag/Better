@@ -28,13 +28,24 @@ export default function DashboardPage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const [statsData, eventsData] = await Promise.all([
-      getStats(),
-      getOrganizerEvents()
-    ]);
-    setDashboardStats(statsData);
-    setEvents(eventsData);
-    setLoading(false);
+    try {
+      const statsData = await getStats();
+      setDashboardStats(statsData);
+      
+      let eventsData = await getOrganizerEvents();
+      
+      // If stats indicate events exist but API returned empty, retry once
+      if (statsData.total_events > 0 && eventsData.length === 0) {
+        console.log("Retrying fetch events...");
+        eventsData = await getOrganizerEvents();
+      }
+      
+      setEvents(eventsData);
+    } catch (err) {
+      setToast("Error loading dashboard data");
+    } finally {
+      setLoading(false);
+    }
   }, [getStats, getOrganizerEvents]);
 
   useEffect(() => {
@@ -118,9 +129,15 @@ export default function DashboardPage() {
       <div className="max-w-6xl mx-auto px-8 py-12">
         {/* Stat & CTA Row */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-          <div className="bg-white border border-gray-100 rounded-xl p-5 min-w-[200px]">
-            <p className="text-xs text-[#83868F] uppercase tracking-wider mb-1 font-medium">Total Events</p>
-            <p className="text-3xl font-light tracking-tight text-[#020605]">{dashboardStats.total_events}</p>
+          <div className="flex gap-4">
+            <div className="bg-white border border-gray-100 rounded-xl p-5 min-w-[140px]">
+              <p className="text-xs text-[#83868F] uppercase tracking-wider mb-1 font-medium">Total Events</p>
+              <p className="text-3xl font-light tracking-tight text-[#020605]">{dashboardStats.total_events}</p>
+            </div>
+            <div className="bg-white border border-gray-100 rounded-xl p-5 min-w-[140px]">
+              <p className="text-xs text-[#83868F] uppercase tracking-wider mb-1 font-medium">Active Events</p>
+              <p className="text-3xl font-light tracking-tight text-[#FF1313]">{activeEvents.length}</p>
+            </div>
           </div>
 
           <button
