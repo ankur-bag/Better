@@ -56,3 +56,11 @@ build/
 # Private Docs
 PRD.md
 .github/
+
+# Python / Render
+.python-version
+
+# Tests
+test_*.py
+check_*.py
+fix_*.py
