@@ -6,6 +6,10 @@
 
 **Avento** is a high-fidelity, full-stack event management platform designed for seamless organization and attendee registration. Built with a focus on correctness, scalability, and modern aesthetics, it empowers organizers to host events with precision and provides attendees with a frictionless registration experience.
 
+**Live Link**: [better-avento.vercel.app](https://better-avento.vercel.app/) | **Walkthrough**: [YouTube Video](https://www.youtube.com/watch?v=FUQH_x6dvK8)
+
+![Avento Home Screen](https://i.postimg.cc/mZjTK99t/Whats-App-Image-2026-05-10-at-8-22-36-PM.jpg)
+
 ---
 
 ## Features
